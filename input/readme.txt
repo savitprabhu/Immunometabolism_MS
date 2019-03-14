@@ -1,5 +1,5 @@
 
-Directory: Jasneet_manuscript/Analysis/input
+Directory: /input
 
 This folder contains all the raw data necessary for analysis:
 1. Directory: immgen_rawdata contains microarray data downloaded from immgen
