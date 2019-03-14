@@ -1,4 +1,5 @@
-# set working dir to source file destination
+## set working dir to source file destination
+# install packages if necessary. Limma is from bioclite.
 library(readr)
 library(readxl)
 library(pheatmap)
