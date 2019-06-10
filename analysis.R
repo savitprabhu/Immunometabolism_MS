@@ -192,6 +192,28 @@ pdf("output/PCA.pdf",width = 8,height = 3.3)
 plot_grid(A, B, labels="AUTO", nrow = 1)
 dev.off()
 
+# Response to reviewer: What does PC3 signify?
+p1<-ggplot(toplot_pca,aes(Dim.1,Dim.3))+
+  geom_point(size=2,stroke=1.2,aes(colour = Lineage,shape=Stages))+
+  scale_colour_manual(values=c("red","blue"))+
+  labs(x="PC1",y="PC3")+
+  theme_linedraw()+
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1.2))+
+  theme(panel.grid = element_blank())+
+  coord_fixed(ratio = 1.5)
+
+p2<-ggplot(toplot_pca,aes(Dim.2,Dim.3))+
+  geom_point(size=2,stroke=1.2,aes(colour = Lineage,shape=Stages))+
+  scale_colour_manual(values=c("red","blue"))+
+  labs(x="PC2",y="PC3")+
+  theme_linedraw()+
+  theme(panel.border = element_rect(colour = "black", fill=NA, size=1.2))+
+  theme(panel.grid = element_blank())+
+  coord_fixed(ratio = 1.5)
+
+pdf("output/PCA_reviewer_comment.pdf",width = 5,height = 7)
+plot_grid(p1, p2, labels="AUTO", nrow = 2)
+dev.off()
 
 # qgraph
 dist_m <- as.matrix(dist(dat[,-1]))
@@ -199,12 +221,15 @@ dist_mi <- 1/dist_m # one over, as qgraph takes similarity matrices as input
 Names <- subsets$Subset
 
 pdf("output/qgraph.pdf",width = 3.3,height = 3.3)
-#tiff("Fig4C.tiff",width = 2.5,height = 3, units = "in", res = 300,pointsize = 10)
-qgraph(dist_mi, vsize=3,labels=TRUE,
+tiff("output/qgraph.tiff",width = 3.3, height = 3.3, units = "in", res = 300,pointsize = 10)
+qgraph(dist_mi, vsize=3,
+       labels=FALSE,
        groups = Names,
        theme ="classic",
        legend.cex=0.5,
-       layout='spring', color= c(brewer.pal(n = 4, 'Oranges'),brewer.pal(4,"Purples")))
+       layout='spring', 
+       color= c("white", "yellow", "orange", "red", "blue", "green", "purple", "black"))
+         #c(brewer.pal(n = 4, 'YlOrRd'),brewer.pal(4,"RdPu")))
 dev.off()
 
 ## Extraction of PC1+2+3 genes
@@ -835,5 +860,34 @@ boxplot(Brank,CD8rank, boxwex = 0.3,notch = T, col="skyblue",
 axis(side = 1, labels = c("B cells","CD8 T cells"), at=c(1,2))
 text(1.5,15000,"p = 0.003")
 dev.off()
+
+# Reviewer question:
+# The reviewer had asked the nature of PC1, PC2 and PC3 genes.
+# To address this, I did a GO enrichment on gorilla using PC1, PC2 or PC3 genes as the input and all the metabolic genes (~1500 genes) in the genelist as the background.
+# Input genes were PC1 genes, PC2 genes and PC3 genes from Table S6. Background genes were all the metabolism genes in the genelist in the 'input' folder.
+
+rm(list = ls())
+
+library(readxl)
+
+# setwd("")
+
+PC1 <- read_excel("input/PC1_PC2_PC3_enrichment/PC1.xlsx")
+PC1 <- PC1[which(PC1$`FDR q-value`<0.05),]
+PC1$PC <- rep("PC1")
+
+PC2 <- read_excel("input/PC1_PC2_PC3_enrichment/PC2.xlsx")
+PC2 <- PC2[which(PC2$`FDR q-value`<0.05), ]
+PC2$PC <- rep("PC2")
+
+PC3 <- read_excel("input/PC1_PC2_PC3_enrichment/PC3.xlsx")
+PC3 <- PC3[which(PC3$`FDR q-value`<0.05),]
+PC3$PC <- rep("PC3")
+
+
+PC <- rbind(PC1, PC2, PC3)
+PC <- PC[, c(6, 1:5)]
+
+write.csv(PC, "output/PC123_enrichment.csv", row.names = F)
 
 
